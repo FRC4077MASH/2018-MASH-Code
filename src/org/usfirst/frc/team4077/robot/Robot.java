@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4077.robot;
 
-import com.ctre.CANTalon;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
@@ -31,10 +31,10 @@ public class Robot extends IterativeRobot {
 	private boolean slowSpeed;
 	private boolean lastAButton;
 	
-	private CANTalon frontLeft = new CANTalon(1);
-	private CANTalon rearLeft = new CANTalon(4);
-	private CANTalon frontRight = new CANTalon(2);
-	private CANTalon rearRight = new CANTalon(3);
+	private WPI_TalonSRX frontLeft = new WPI_TalonSRX(1);
+	private WPI_TalonSRX rearLeft = new WPI_TalonSRX(4);
+	private WPI_TalonSRX frontRight = new WPI_TalonSRX(2);
+	private WPI_TalonSRX rearRight = new WPI_TalonSRX(3);
 	
 	private Joystick stick = new Joystick(0);
 	
@@ -99,7 +99,7 @@ public class Robot extends IterativeRobot {
 				stick.getRawAxis(1) * (slowSpeed ? speedFactor : 1.0),
 				stick.getRawAxis(4) * (slowSpeed ? speedFactor : 1.0), true);
 
-		System.out.println("Encoder Value: " + rearRight.getEncPosition());
+		System.out.println("Encoder Value: " + rearRight.getSelectedSensorPosition(0));
 
 		Timer.delay(0.005); // wait 5ms to avoid hogging CPU cycles
 
@@ -109,8 +109,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void zeroAllSensors() {
-		rearRight.setEncPosition(0);
-		rearRight.setPosition(0);
+		rearRight.setSelectedSensorPosition(0, 0, 0);
 		
 		gyro.reset();
 	}

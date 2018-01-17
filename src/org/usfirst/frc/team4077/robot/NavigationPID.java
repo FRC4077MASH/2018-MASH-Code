@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4077.robot;
 
-import com.ctre.CANTalon;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 
 //Tested: Working
@@ -15,10 +15,10 @@ public class NavigationPID {
 	}
 
 	// Private variables
-	private CANTalon frontLeft;
-	private CANTalon rearLeft;
-	private CANTalon frontRight;
-	private CANTalon rearRight;
+	private WPI_TalonSRX frontLeft;
+	private WPI_TalonSRX rearLeft;
+	private WPI_TalonSRX frontRight;
+	private WPI_TalonSRX rearRight;
 
 	private DRIVE_TYPE driveType;
 	private ADXRS450_Gyro gyro;
@@ -32,8 +32,8 @@ public class NavigationPID {
 	private double yawAngle;
 	private double completedHeading;
 
-	public NavigationPID(double[][] m_movementCommandArray, CANTalon m_frontLeft, CANTalon m_rearLeft,
-			CANTalon m_frontRight, CANTalon m_rearRight, DRIVE_TYPE m_driveType, ADXRS450_Gyro m_gyro,
+	public NavigationPID(double[][] m_movementCommandArray, WPI_TalonSRX m_frontLeft, WPI_TalonSRX m_rearLeft,
+			WPI_TalonSRX m_frontRight, WPI_TalonSRX m_rearRight, DRIVE_TYPE m_driveType, ADXRS450_Gyro m_gyro,
 			int m_encoderTicksPerWheelRevolution, double m_wheelDiameter, double p, double i, double d) {
 
 		pid = new MiniPID(p, i, d);
@@ -59,7 +59,7 @@ public class NavigationPID {
 	}
 
 	public int wheelEncoderValue() {
-		return rearRight.getEncPosition();
+		return rearRight.getSelectedSensorPosition(0);
 	}
 
 	public void loopNavigation() {
