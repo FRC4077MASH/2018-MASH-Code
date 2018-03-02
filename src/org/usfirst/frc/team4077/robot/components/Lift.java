@@ -4,7 +4,6 @@ import org.usfirst.frc.team4077.robot.autonomous.PIDControllerAdvanced;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -17,9 +16,6 @@ public class Lift {
 
   private DigitalInput mLeftTopLimit = new DigitalInput(1);
   private DigitalInput mRightTopLimit = new DigitalInput(0);
-
-  private AnalogInput mLeftLiftPotentiometer = new AnalogInput(0);
-  private AnalogInput mRightLiftPotentiometer = new AnalogInput(1);
 
   private PIDControllerAdvanced mPIDLeftLift;
   private PIDControllerAdvanced mPIDRightLift;
@@ -81,37 +77,6 @@ public class Lift {
     }
   }
 
-  public void liftToHeight(double inches) {
-    mPIDLeftLift.setSetpoint(inches);
-    mPIDRightLift.setSetpoint(inches);
-  }
-
-  public void runPID(boolean safetyLimitOn) {
-    if (mIsEnabled) {
-      double leftPower =
-          mPIDLeftLift.compute(getLinearLiftDistanceFromPotentiometer("L"));
-      double rightPower =
-          mPIDRightLift.compute(getLinearLiftDistanceFromPotentiometer("R"));
-
-      leftPower = applyDeadband(leftPower, DEADBAND);
-      rightPower = applyDeadband(rightPower, DEADBAND);
-
-      if (safetyLimitOn) {
-        leftPower = limitLiftToSwitches(leftPower, "L");
-        rightPower = limitLiftToSwitches(rightPower, "R");
-      }
-
-      SmartDashboard.putString("Lift Goal: ",
-                               Double.toString(mPIDLeftLift.getSetpoint()));
-      SmartDashboard.putString("Left PID Output: ", Double.toString(leftPower));
-      SmartDashboard.putString("Right PID Output: ",
-                               Double.toString(rightPower));
-
-      mLeftLift.set(leftPower);
-      // mRightLift.set(rightPower);
-    }
-  }
-
   public void setIndividualMotorPower(String motorAbbreviation, double power) {
     if (mIsEnabled) {
       switch (motorAbbreviation) {
@@ -161,18 +126,6 @@ public class Lift {
       }
     } else {
       return 0.0;
-    }
-  }
-
-  private double getLinearLiftDistanceFromPotentiometer(String motor) {
-    switch (motor) {
-    case "L":
-      return (-mLeftLiftPotentiometer.getValue() + 4096) /
-          POTENTIOMETER_VALS_PER_INCH;
-    case "R":
-      return mRightLiftPotentiometer.getValue() / POTENTIOMETER_VALS_PER_INCH;
-    default:
-      return 0;
     }
   }
 

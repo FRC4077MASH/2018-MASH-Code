@@ -1,6 +1,6 @@
 package org.usfirst.frc.team4077.robot;
 
-import org.usfirst.frc.team4077.robot.autonomous.NavigatePID;
+import org.usfirst.frc.team4077.robot.autonomous.autoModes.TimeBasedPassAutoLine;
 import org.usfirst.frc.team4077.robot.common.ControlInterpreter;
 import org.usfirst.frc.team4077.robot.components.Climber;
 import org.usfirst.frc.team4077.robot.components.Drive;
@@ -21,17 +21,12 @@ public class Robot extends IterativeRobot {
   private ControlInterpreter mControlInterpreter =
       ControlInterpreter.getInstance();
 
-  private NavigatePID mNavigator;
+  private TimeBasedPassAutoLine mPassAutoLineTask =
+      new TimeBasedPassAutoLine(mDrive);
 
   private double mSpeedFactor = 0.75;
   private boolean mSlowSpeed;
   private boolean mLastSlowButton;
-
-  // private long mLastTime;
-
-  private double[][] testMovementTypes = new double[][] {
-      {0, 0.5, 36.0}, {0 - 0.5, -36.0}, {1, 1.0, 72.0}, {1, -1.0, -72.0},
-      {2, 0.5, 90},   {2, -0.5, -90},   {-1, 0.0, 0.0}};
 
   /**
    * This function is run when the robot is first started up and should be
@@ -44,8 +39,6 @@ public class Robot extends IterativeRobot {
     mLift.enableComponent(true);
     mClimber.enableComponent(true);
     mManipulator.enableComponent(true);
-
-    mNavigator = new NavigatePID(testMovementTypes, mDrive, 30);
 
     mDrive.resetAll();
     mLift.resetAll();
@@ -61,8 +54,7 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
-    mDrive.resetEncoders();
-    mNavigator.initialize();
+    mPassAutoLineTask.initAutoModeFromSmartDashboard();
   }
 
   /**
@@ -70,7 +62,7 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousPeriodic() {
-    mNavigator.loopNavigation();
+    mPassAutoLineTask.executeLoop();
   }
 
   /**
@@ -87,9 +79,6 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void teleopPeriodic() {
-    // long currentTime = System.currentTimeMillis();
-    // long timeDifference = mLastTime-currentTime;
-
     // Drive
     boolean currentSlowButton = mControlInterpreter.getSlowButton();
 
@@ -106,23 +95,8 @@ public class Robot extends IterativeRobot {
       mDrive.driveCartesian(0, -1.0, 0.0);
     }
 
-    /*
-        // Lift
-        if (mControlInterpreter.getLiftBottom()) {
-          mLift.liftToHeight(0.5);
-        } else if (mControlInterpreter.getLiftSwitch()) {
-          mLift.liftToHeight(1.5);
-        }
-
-        mLift.runPID(true);*/
-
+    // Lift
     mLift.liftWithLimitSwitchLimits(mControlInterpreter.getLift(), true);
-
-    // if (timeDifference >= 1000) {
-    //	System.out.println("Left: " +
-    // mLift.mLeftLift.getSensorCollection().getQuadraturePosition() + ", Right:
-    //" + mLift.mRightLift.getSensorCollection().getQuadraturePosition());
-    //}
 
     // Climber
     if (mControlInterpreter.getClimbUp()) {
@@ -143,15 +117,7 @@ public class Robot extends IterativeRobot {
     // NOTE Telemetry/SmartDashboard Prints
     mDrive.printTelemetry();
     mLift.printTelemetry();
-    // System.out.println("Loop Time: " + loopTime);
-    // System.out.println("Slowmode: " + mSlowSpeed);
-
-    // mLastTime = currentTime;
 
     Timer.delay(0.005);
-    // mLift.setIndividualMotorPower("L", 0.7);
-    // mLift.setIndividualMotorPower("R", 0.7);
-    // System.out.println(mLift.mLeftLift.getSensorCollection().getQuadratureVelocity()
-    // + "\t" + mLift.mRightLift.getSensorCollection().getQuadratureVelocity());
   }
 }
