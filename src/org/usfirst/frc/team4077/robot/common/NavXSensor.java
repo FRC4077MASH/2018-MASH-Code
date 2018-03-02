@@ -14,7 +14,7 @@ public class NavXSensor {
     if (initialized)
       return;
 
-    //System.out.println("NavXSensor initialize called...");
+    // System.out.println("NavXSensor initialize called...");
 
     try {
       ahrs = new AHRS(SPI.Port.kMXP);
@@ -40,7 +40,7 @@ public class NavXSensor {
   }
 
   public static void reset() {
-    //System.out.println("NavXSensor.reset called!");
+    // System.out.println("NavXSensor.reset called!");
 
     if (ahrs != null) {
       ahrs.reset();
@@ -53,7 +53,7 @@ public class NavXSensor {
       // get the absolute angle after reset - Not sure why it is non-zero, but
       // we need to record it to zero it out
       yawOffset = ahrs.getAngle();
-      //System.out.println("yawOffset read = " + yawOffset);
+      // System.out.println("yawOffset read = " + yawOffset);
     }
   }
 

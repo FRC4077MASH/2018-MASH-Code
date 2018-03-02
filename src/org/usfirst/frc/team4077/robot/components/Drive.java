@@ -2,8 +2,6 @@ package org.usfirst.frc.team4077.robot.components;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 public class Drive {
   // NOTE Private Objects
   private static Drive mInstance = new Drive();
@@ -87,15 +85,10 @@ public class Drive {
   }
 
   public void resetSensors() {
-	  //Nothing yet
+    // Nothing yet
   }
 
-  public void printTelemetry() {
-    SmartDashboard.putString("Left Drive Distance: ",
-                             Double.toString(getMotorDistance("L")));
-    SmartDashboard.putString("Right Drive Distance: ",
-                             Double.toString(getMotorDistance("R")));
-  }
+  public void printTelemetry() {}
 
   // NOTE Getters
   public boolean getEnableStatus() { return mIsEnabled; }

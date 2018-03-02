@@ -52,7 +52,7 @@ public class PIDControllerAdvanced {
 
       outputUnlimited = outputProportional + outputIntegral - outputDerivative;
       output = outputUnlimited;
-      
+
       if (output > outMax) {
         output = outMax;
       } else if (output < outMin) {

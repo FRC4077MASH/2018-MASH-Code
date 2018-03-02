@@ -26,8 +26,8 @@ public class Robot extends IterativeRobot {
   private double mSpeedFactor = 0.75;
   private boolean mSlowSpeed;
   private boolean mLastSlowButton;
-  
-  //private long mLastTime;
+
+  // private long mLastTime;
 
   private double[][] testMovementTypes = new double[][] {
       {0, 0.5, 36.0}, {0 - 0.5, -36.0}, {1, 1.0, 72.0}, {1, -1.0, -72.0},
@@ -51,7 +51,7 @@ public class Robot extends IterativeRobot {
     mLift.resetAll();
 
     UsbCamera mC920Cam = CameraServer.getInstance().startAutomaticCapture();
-    mC920Cam.setVideoMode(VideoMode.PixelFormat.kYUYV, 640, 480, 15);
+    mC920Cam.setVideoMode(VideoMode.PixelFormat.kMJPEG, 640, 480, 15);
     UsbCamera mLifecam3000 = CameraServer.getInstance().startAutomaticCapture();
     mLifecam3000.setVideoMode(VideoMode.PixelFormat.kMJPEG, 320, 240, 24);
   }
@@ -61,6 +61,7 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
+    mDrive.resetEncoders();
     mNavigator.initialize();
   }
 
@@ -86,9 +87,9 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void teleopPeriodic() {
-	  //long currentTime = System.currentTimeMillis();
-	  //long timeDifference = mLastTime-currentTime;
-	  
+    // long currentTime = System.currentTimeMillis();
+    // long timeDifference = mLastTime-currentTime;
+
     // Drive
     boolean currentSlowButton = mControlInterpreter.getSlowButton();
 
@@ -105,18 +106,23 @@ public class Robot extends IterativeRobot {
       mDrive.driveCartesian(0, -1.0, 0.0);
     }
 
-    // Lift
-    if (mControlInterpreter.getLiftBottom()) {
-      mLift.liftToHeight(0);
-    } else if (mControlInterpreter.getLiftSwitch()) {
-      mLift.liftToHeight(30);
-    }
+    /*
+        // Lift
+        if (mControlInterpreter.getLiftBottom()) {
+          mLift.liftToHeight(0.5);
+        } else if (mControlInterpreter.getLiftSwitch()) {
+          mLift.liftToHeight(1.5);
+        }
 
-    //mLift.runPID(true);
-    
-    //if (timeDifference >= 1000) {
-	//	System.out.println("Left: " + mLift.mLeftLift.getSensorCollection().getQuadraturePosition() + ", Right: " + mLift.mRightLift.getSensorCollection().getQuadraturePosition());
-	//}
+        mLift.runPID(true);*/
+
+    mLift.liftWithLimitSwitchLimits(mControlInterpreter.getLift(), true);
+
+    // if (timeDifference >= 1000) {
+    //	System.out.println("Left: " +
+    // mLift.mLeftLift.getSensorCollection().getQuadraturePosition() + ", Right:
+    //" + mLift.mRightLift.getSensorCollection().getQuadraturePosition());
+    //}
 
     // Climber
     if (mControlInterpreter.getClimbUp()) {
@@ -139,12 +145,13 @@ public class Robot extends IterativeRobot {
     mLift.printTelemetry();
     // System.out.println("Loop Time: " + loopTime);
     // System.out.println("Slowmode: " + mSlowSpeed);
-    
-    //mLastTime = currentTime;
+
+    // mLastTime = currentTime;
 
     Timer.delay(0.005);
-/*	  mLift.setIndividualMotorPower("L", 0.7);
-	  mLift.setIndividualMotorPower("R", 0.7);
-	  //System.out.println(mLift.mLeftLift.getSensorCollection().getQuadratureVelocity() + "\t" + mLift.mRightLift.getSensorCollection().getQuadratureVelocity());
-  */}
+    // mLift.setIndividualMotorPower("L", 0.7);
+    // mLift.setIndividualMotorPower("R", 0.7);
+    // System.out.println(mLift.mLeftLift.getSensorCollection().getQuadratureVelocity()
+    // + "\t" + mLift.mRightLift.getSensorCollection().getQuadratureVelocity());
+  }
 }

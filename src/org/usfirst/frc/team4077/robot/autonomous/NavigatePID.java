@@ -16,8 +16,7 @@ public class NavigatePID {
   private double mYawAngle;
   private double mCompletedHeading;
 
-  public NavigatePID(double[][] movementArray, Drive drive,
-                     long sampleTime) {
+  public NavigatePID(double[][] movementArray, Drive drive, long sampleTime) {
     mPID =
         new PIDControllerAdvanced(PIDControllerAdvanced.DIRECT, sampleTime,
                                   -1.0, 1.0, PIDControllerAdvanced.AUTOMATIC);

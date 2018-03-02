@@ -32,13 +32,11 @@ public class ControlInterpreter {
   }
 
   public boolean getSlowButton() { return mDriveStick.getRawButton(5); }
-  
+
   public boolean getPanicButton() { return mDriveStick.getRawButton(6); }
 
   // NOTE TODO Operator Controls
-  public boolean getLiftBottom() { return mOperatorStick.getRawButton(1); }
-  
-  public boolean getLiftSwitch() { return mOperatorStick.getRawButton(2); }
+  public double getLift() { return -mOperatorStick.getRawAxis(1); }
 
   public boolean getClimbUp() { return mOperatorStick.getRawButton(5); }
 
