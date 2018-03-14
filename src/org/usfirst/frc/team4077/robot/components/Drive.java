@@ -2,6 +2,8 @@ package org.usfirst.frc.team4077.robot.components;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class Drive {
   // NOTE Private Objects
   private static Drive mInstance = new Drive();
@@ -11,15 +13,17 @@ public class Drive {
   private WPI_TalonSRX mFrontRight = new WPI_TalonSRX(8);
   private WPI_TalonSRX mRearRight = new WPI_TalonSRX(7);
 
-  // NOTE Public Constants
-  public static final double WHEEL_DIAMETER = 6.0;
-  public static final int ENCODER_TICKS_PER_ROTATION = 1000;
-  public static final double ENCODER_TO_INCH_RATIO =
-      ENCODER_TICKS_PER_ROTATION / (WHEEL_DIAMETER * Math.PI);
+  // NOTE Public Constants COMMENT OUT VALUES FOR COMP ROBOT
+  public static final double WHEEL_DIAMETER = 4.0;                      // 6.0;
+  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 1440 * (3); // 1000;
+  public static final int ENCODER_TICKS_PER_ROTATION_RIGHT =
+      1440 * (3); // 1000;
   public static final double DEADBAND = 0.02;
 
   // NOTE Private Variables
   private boolean mIsEnabled = false;
+  private double mLeftEncoderOffset;
+  private double mRightEncoderOffset;
 
   // NOTE Constructor
   private Drive() {
@@ -80,27 +84,37 @@ public class Drive {
   }
 
   public void resetEncoders() {
-    mRearLeft.getSensorCollection().setQuadraturePosition(0, 10);
-    mRearRight.getSensorCollection().setQuadraturePosition(0, 10);
+    mLeftEncoderOffset = getMotorDistance("L", false);
+    mRightEncoderOffset = getMotorDistance("R", false);
+    System.out.println(mLeftEncoderOffset);
   }
 
   public void resetSensors() {
     // Nothing yet
   }
 
-  public void printTelemetry() {}
+  public void printTelemetry() {
+    SmartDashboard.putString("Left Distance: ",
+                             Double.toString(getMotorDistance("L", true)));
+    SmartDashboard.putString("Right Distance: ",
+                             Double.toString(getMotorDistance("R", true)));
+  }
 
   // NOTE Getters
   public boolean getEnableStatus() { return mIsEnabled; }
 
-  public double getMotorDistance(String motorAbbreviation) {
+  public double getMotorDistance(String motorAbbreviation, boolean useOffsets) {
     switch (motorAbbreviation) {
     case "L":
       return rotationsToInches(
-          mRearLeft.getSensorCollection().getQuadraturePosition() / 1000.0);
+                 mRearLeft.getSensorCollection().getQuadraturePosition() /
+                 (double)ENCODER_TICKS_PER_ROTATION_LEFT) -
+          (useOffsets ? mLeftEncoderOffset : 0);
     case "R":
-      return rotationsToInches(
-          mRearRight.getSensorCollection().getQuadraturePosition() / 1000.0);
+      return -rotationsToInches(
+                 mRearRight.getSensorCollection().getQuadraturePosition() /
+                 (double)ENCODER_TICKS_PER_ROTATION_RIGHT) -
+          (useOffsets ? mRightEncoderOffset : 0);
     default:
       return 0;
     }

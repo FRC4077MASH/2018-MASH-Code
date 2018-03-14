@@ -1,11 +1,10 @@
 package org.usfirst.frc.team4077.robot.autonomous.automodes;
 
 import org.usfirst.frc.team4077.robot.components.Drive;
-
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class TimeBasedPassAutoLine {
+public class EncoderBasePassAutoLine {
   private Drive mDrive;
   private Preferences mPrefs;
 
@@ -13,25 +12,22 @@ public class TimeBasedPassAutoLine {
   private long mDelayAutoTime;
   private long mStartTime;
   private int mNavigationStepCounter;
-  private long mCurrentStepStartTime;
+  private double mCurrentStepEncoderVal;
 
   public final static double MAX_NAVIGATION_SPEED = 0.75;
 
-  public final static long CROSS_LINE_TIME_MILLIS = 3000;
-  public final static long MOVE_FORWARD_TO_AVOID_SWITCH_TIME_MILLIS = 1000;
-  public final static long TURN_TO_45_TIME_MILLIS = 1000;
-
-  public TimeBasedPassAutoLine(Drive drive) {
+  public EncoderBasePassAutoLine(Drive drive) {
     mDrive = drive;
     mPrefs = Preferences.getInstance();
   }
 
   public void initAutoModeFromSmartDashboard() {
+    mDrive.driveCartesian(0, 0, 0);
+    mDrive.resetAll();
     mStartTime = System.currentTimeMillis();
     mNavigationStepCounter = 0;
     mStartPosition = mPrefs.getInt("AutoStartPos", 0);
     mDelayAutoTime = mPrefs.getLong("AutoDelayMilliseconds", 0);
-    System.out.println("mStartPosition: " + mStartPosition);
   }
 
   public void executeLoop() {
@@ -40,7 +36,7 @@ public class TimeBasedPassAutoLine {
       switch (mNavigationStepCounter) {
       case 0: // Delay
         if (getAutoTime() >= mDelayAutoTime) {
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           System.out.println("Running Left");
           mNavigationStepCounter++;
         } else {
@@ -48,9 +44,9 @@ public class TimeBasedPassAutoLine {
         }
         break;
       case 1: // Move forward
-        if (getAutoTime() >= CROSS_LINE_TIME_MILLIS + mCurrentStepStartTime) {
+        if (getEncoderDistance() >= 180.0 + mCurrentStepEncoderVal) {
           mDrive.driveCartesian(0, 0, 0);
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           mNavigationStepCounter++;
         } else {
           mDrive.driveCartesian(0, MAX_NAVIGATION_SPEED, 0);
@@ -66,7 +62,7 @@ public class TimeBasedPassAutoLine {
       switch (mNavigationStepCounter) {
       case 0: // Delay
         if (getAutoTime() >= mDelayAutoTime) {
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           System.out.println("Running Center");
           mNavigationStepCounter++;
         } else {
@@ -74,13 +70,54 @@ public class TimeBasedPassAutoLine {
         }
         break;
       case 1: // Move forward
-        if (getAutoTime() >= CROSS_LINE_TIME_MILLIS + mCurrentStepStartTime) {
+        if (getEncoderDistance() >= 24 + mCurrentStepEncoderVal) {
           mDrive.driveCartesian(0, 0, 0);
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           mNavigationStepCounter++;
         } else {
           mDrive.driveCartesian(0, MAX_NAVIGATION_SPEED / 2, 0);
         }
+        break;
+      case 2: // Turn
+        if (mDrive.getMotorDistance("L", true) >=
+            24.4 + mCurrentStepEncoderVal) {
+          mDrive.driveCartesian(0, 0, 0);
+          mCurrentStepEncoderVal = getEncoderDistance();
+          mNavigationStepCounter++;
+        } else {
+          mDrive.driveCartesian(0, 0, MAX_NAVIGATION_SPEED / 2);
+        }
+        break;
+      case 3: // Move forward
+        if (getEncoderDistance() >= 24 + mCurrentStepEncoderVal) {
+          mDrive.driveCartesian(0, 0, 0);
+          mCurrentStepEncoderVal = getEncoderDistance();
+          mNavigationStepCounter++;
+        } else {
+          mDrive.driveCartesian(0, MAX_NAVIGATION_SPEED / 2, 0);
+        }
+        break;
+      case 4: // Turn
+        if (mDrive.getMotorDistance("L", true) >=
+            24.4 + mCurrentStepEncoderVal) {
+          mDrive.driveCartesian(0, 0, 0);
+          mCurrentStepEncoderVal = getEncoderDistance();
+          mNavigationStepCounter++;
+        } else {
+          mDrive.driveCartesian(0, 0, MAX_NAVIGATION_SPEED / 2);
+        }
+        break;
+      case 5:
+        if (getEncoderDistance() >= 24 + mCurrentStepEncoderVal) {
+          mDrive.driveCartesian(0, 0, 0);
+          mCurrentStepEncoderVal = getEncoderDistance();
+          mNavigationStepCounter++;
+        } else {
+          mDrive.driveCartesian(0, MAX_NAVIGATION_SPEED / 2, 0);
+        }
+        break;
+      case 6:
+        // Do nothing
         break;
       }
       break;
@@ -89,7 +126,7 @@ public class TimeBasedPassAutoLine {
       switch (mNavigationStepCounter) {
       case 0: // Delay
         if (getAutoTime() >= mDelayAutoTime) {
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           System.out.println("Running Right");
           mNavigationStepCounter++;
         } else {
@@ -97,9 +134,9 @@ public class TimeBasedPassAutoLine {
         }
         break;
       case 1: // Move forward
-        if (getAutoTime() >= CROSS_LINE_TIME_MILLIS + mCurrentStepStartTime) {
+        if (getEncoderDistance() >= 120.0 + mCurrentStepEncoderVal) {
           mDrive.driveCartesian(0, 0, 0);
-          mCurrentStepStartTime = getAutoTime();
+          mCurrentStepEncoderVal = getEncoderDistance();
           mNavigationStepCounter++;
         } else {
           mDrive.driveCartesian(0, MAX_NAVIGATION_SPEED, 0);
@@ -121,4 +158,9 @@ public class TimeBasedPassAutoLine {
   }
 
   private long getAutoTime() { return System.currentTimeMillis() - mStartTime; }
+  private double getEncoderDistance() {
+    return (mDrive.getMotorDistance("L", true) +
+            mDrive.getMotorDistance("R", true)) /
+        2;
+  }
 }

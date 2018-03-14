@@ -1,112 +1,78 @@
 package org.usfirst.frc.team4077.robot.common;
-import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Timer;
 
+import com.kauailabs.navx.AHRSProtocol.AHRSUpdateBase;
+import com.kauailabs.navx.frc.AHRS;
+import com.kauailabs.navx.frc.ITimestampedDataSubscriber;
+
+/**
+ * Driver for a NavX board. Basically a wrapper for the {@link AHRS} class
+ */
 public class NavXSensor {
-
-  private static boolean initialized = false;
-
-  public static void initialize() {
-
-    if (initialized)
-      return;
-
-    // System.out.println("NavXSensor initialize called...");
-
-    try {
-      ahrs = new AHRS(SPI.Port.kMXP);
-    } catch (RuntimeException ex) {
-      DriverStation.reportError(
-          "Error instantiating navX MXP:  " + ex.getMessage(), true);
-    }
-
-    reset();
-
-    initialized = true;
-  }
-
-  // instance data and methods
-  private static AHRS ahrs = null;
-
-  private static double yawOffset = 0.0;
-
-  public static class Angles {
-    float roll = 0f;
-    float pitch = 0f;
-    float yaw = 0f;
-  }
-
-  public static void reset() {
-    // System.out.println("NavXSensor.reset called!");
-
-    if (ahrs != null) {
-      ahrs.reset();
-      ahrs.resetDisplacement();
-      ahrs.zeroYaw();
-
-      // allow zeroing to take effect
-      Timer.delay(0.1);
-
-      // get the absolute angle after reset - Not sure why it is non-zero, but
-      // we need to record it to zero it out
-      yawOffset = ahrs.getAngle();
-      // System.out.println("yawOffset read = " + yawOffset);
+  protected class Callback implements ITimestampedDataSubscriber {
+    @Override
+    public void timestampedDataReceived(long system_timestamp,
+                                        long sensor_timestamp,
+                                        AHRSUpdateBase update, Object context) {
+      synchronized (NavXSensor.this) {
+        // This handles the fact that the sensor is inverted from our coordinate
+        // conventions.
+        if (mLastSensorTimestampMs != kInvalidTimestamp &&
+            mLastSensorTimestampMs < sensor_timestamp) {
+          mYawRateDegreesPerSecond =
+              1000.0 * (-mYawDegrees - update.yaw) /
+              (double)(sensor_timestamp - mLastSensorTimestampMs);
+        }
+        mLastSensorTimestampMs = sensor_timestamp;
+        mYawDegrees = -update.yaw;
+      }
     }
   }
 
-  public static AHRS getAHRS() { return ahrs; }
+  protected AHRS mAHRS;
 
-  public static boolean isConnected() {
-    if (ahrs != null) {
-      return ahrs.isConnected();
-    }
+  protected double mAngleAdjustment;
+  protected double mYawDegrees;
+  protected double mYawRateDegreesPerSecond;
+  protected final long kInvalidTimestamp = -1;
+  protected long mLastSensorTimestampMs;
 
-    return false;
+  public NavXSensor(SPI.Port spi_port_id) {
+    mAHRS = new AHRS(spi_port_id, (byte)200);
+    resetState();
+    mAHRS.registerCallback(new Callback(), null);
   }
 
-  public static boolean isCalibrating() {
-    if (ahrs != null) {
-      return ahrs.isCalibrating();
-    }
-
-    return false;
+  public synchronized void reset() {
+    mAHRS.reset();
+    resetState();
   }
 
-  public static Angles getAngles() {
-    Angles angles = new Angles();
-
-    if (ahrs != null) {
-      angles.roll = ahrs.getRoll();
-      angles.pitch = ahrs.getPitch();
-      angles.yaw = ahrs.getYaw();
-    }
-
-    return angles;
+  public synchronized void zeroYaw() {
+    mAHRS.zeroYaw();
+    resetState();
   }
 
-  // returns yaw angle (-180 deg to +180 deg)
-  public static float getYaw() {
-    float yaw = 0f;
-
-    if (ahrs != null) {
-      yaw = ahrs.getYaw();
-    }
-
-    return yaw;
+  private void resetState() {
+    mLastSensorTimestampMs = kInvalidTimestamp;
+    mYawDegrees = 0.0;
+    mYawRateDegreesPerSecond = 0.0;
   }
 
-  // returns absolute yaw angle (can be larger than 360 deg)
-  public static double getAngle() {
-    double yaw = 0f;
-
-    if (ahrs != null) {
-      yaw = ahrs.getAngle();
-      yaw -= yawOffset; // needed to get to true angle
-    }
-
-    return yaw;
+  public synchronized void setAngleAdjustment(double adjustment) {
+    mAngleAdjustment = adjustment;
   }
+
+  protected synchronized double getRawYawDegrees() { return mYawDegrees; }
+
+  public double getYaw() { return getRawYawDegrees() + mAngleAdjustment; }
+
+  public double getYawRateDegreesPerSec() { return mYawRateDegreesPerSecond; }
+
+  public double getYawRateRadiansPerSec() {
+    return 180.0 / Math.PI * getYawRateDegreesPerSec();
+  }
+
+  public double getRawAccelX() { return mAHRS.getRawAccelX(); }
 }
