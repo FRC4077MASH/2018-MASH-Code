@@ -74,5 +74,9 @@ public class NavXSensor {
     return 180.0 / Math.PI * getYawRateDegreesPerSec();
   }
 
+  public double getAngleUnlimited() {
+    return -mAHRS.getAngle() + mAngleAdjustment;
+  }
+
   public double getRawAccelX() { return mAHRS.getRawAccelX(); }
 }

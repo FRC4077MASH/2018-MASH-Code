@@ -69,10 +69,6 @@ public class Lift {
       leftPower = limitLiftToSwitches(leftPower, "L");
       rightPower = limitLiftToSwitches(rightPower, "R");
 
-      SmartDashboard.putString("Left Lift Power: ", Double.toString(leftPower));
-      SmartDashboard.putString("Right Lift Power: ",
-                               Double.toString(rightPower));
-
       mLeftLift.set(ControlMode.PercentOutput,
                     leftPower * LEFT_MOTOR_SPEED_SCALE);
       mRightLift.set(ControlMode.PercentOutput,

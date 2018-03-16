@@ -18,6 +18,7 @@ public class AutoModeSelector {
   private boolean mRunAuto;
   private boolean mDoSwitch;
   private boolean mDoScale;
+  private static long mAutoStartTime;
 
   private Preferences mPrefs;
 
@@ -34,6 +35,12 @@ public class AutoModeSelector {
     /* Auto Mode Objects Here */
     mAutoDoSwitch = new AutoDoSwitch(mDrive, mLift, mManipulator);
     /* Auto Mode Objects Here */
+
+    mPrefs.putInt("AutoStartPos", 0);
+    mPrefs.putLong("AutoDelayMilliseconds", 0);
+    mPrefs.putBoolean("AutoRunAuto", true);
+    mPrefs.putBoolean("AutoDoSwitch", false);
+    mPrefs.putBoolean("AutoDoScale", false);
   }
 
   public void initAutoFromSmartDashboard() {
@@ -73,19 +80,30 @@ public class AutoModeSelector {
       // Neither
       System.out.println("Running auto: None");
     }
+
+    mAutoStartTime = System.currentTimeMillis();
   }
 
   public void executeLoop() {
     if (mRunAuto) {
       if (mDoSwitch && mDoScale) {
         // Do both
+        System.out.println("Running auto: Both");
       } else if (mDoSwitch && !mDoScale) {
         // Do Switch
+        System.out.println("Running auto: Switch");
+        mAutoDoSwitch.executeLoop();
       } else if (!mDoSwitch && mDoScale) {
         // Do Scale
+        System.out.println("Running auto: Scale");
       } else {
         // Neither
+        System.out.println("Running auto: None");
       }
     }
+  }
+
+  public static long getAutoTime() {
+    return System.currentTimeMillis() - mAutoStartTime;
   }
 }

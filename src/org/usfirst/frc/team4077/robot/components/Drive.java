@@ -16,10 +16,12 @@ public class Drive {
   private TalonSRX mFrontRight = new TalonSRX(8);
   private TalonSRX mRearRight = new TalonSRX(7);
 
-  // NOTE Public Constants COMMENT OUT VALUES FOR COMP ROBOT
-  public static final double WHEEL_DIAMETER = 4.0;                  // 6.0;
-  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 10800;  // 1000;
-  public static final int ENCODER_TICKS_PER_ROTATION_RIGHT = 10800; // 1000;
+  // NOTE Public Constants  Old Values: Comp, program
+  public static final double WHEEL_DIAMETER = 4.0; // 6.0, 4.0
+  public static final int ENCODER_TICKS_PER_ROTATION_LEFT =
+      10800; // 1000, 10800
+  public static final int ENCODER_TICKS_PER_ROTATION_RIGHT =
+      10800; // 1000, 10800
   public static final double DEADBAND = 0.02;
 
   // NOTE Private Variables
@@ -32,7 +34,7 @@ public class Drive {
     mRearLeft.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1,
                                    10);
     mRearLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
-    mRearLeft.setSensorPhase(true);
+    mRearLeft.setSensorPhase(true); // Change to false for comp bot
     mRearLeft.setInverted(true);
 
     mFrontRight.setInverted(false);
@@ -40,7 +42,7 @@ public class Drive {
     mRearRight.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1,
                                     10);
     mRearRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
-    mRearRight.setSensorPhase(false);
+    mRearRight.setSensorPhase(false); // Change to true for comp bot
     mRearRight.setInverted(false);
   }
 

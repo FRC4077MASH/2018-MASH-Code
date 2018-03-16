@@ -50,12 +50,13 @@ public class NavigatePID {
     mMovementArrayStep = 0;
     mNavX.zeroYaw();
     mDrive.resetAll();
+    setSetpoint(0);
     mDistanceReferenceLeft = mDrive.getMotorDistance("L");
     mDistanceReferenceRight = mDrive.getMotorDistance("R");
   }
 
   public void loopNavigation() {
-    mYawAngle = mNavX.getYaw();
+    mYawAngle = mNavX.getAngleUnlimited();
     mDrive.printTelemetry();
     SmartDashboard.putNumber("Yaw", mYawAngle);
     move((int)mMovementArray[mMovementArrayStep][0],
@@ -150,7 +151,7 @@ public class NavigatePID {
     }
   }
 
-  private void fullStop() { mDrive.driveCartesian(0.0, 0.0, 0.0); }
+  public void fullStop() { mDrive.driveCartesian(0.0, 0.0, 0.0); }
 
   public void nextMovement() {
     fullStop();
@@ -163,7 +164,6 @@ public class NavigatePID {
 
   private void loopPID(double forwardsTp, double horizontalTp) {
     double output = mPID.compute(mYawAngle);
-    System.out.println("PID Output: " + output);
     mDrive.driveCartesian(horizontalTp, forwardsTp, output);
   }
 }
