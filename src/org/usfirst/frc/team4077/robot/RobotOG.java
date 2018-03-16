@@ -1,6 +1,5 @@
 package org.usfirst.frc.team4077.robot;
 
-import org.usfirst.frc.team4077.robot.autonomous.automodes.EncoderBasePassAutoLine;
 import org.usfirst.frc.team4077.robot.common.ControlInterpreter;
 import org.usfirst.frc.team4077.robot.components.Climber;
 import org.usfirst.frc.team4077.robot.components.Drive;
@@ -20,9 +19,6 @@ public class RobotOG extends IterativeRobot {
 
   private ControlInterpreter mControlInterpreter =
       ControlInterpreter.getInstance();
-
-  private EncoderBasePassAutoLine mPassAutoLineTask =
-      new EncoderBasePassAutoLine(mDrive);
 
   private double mSpeedFactor = 0.75;
   private boolean mSlowSpeed;
@@ -60,7 +56,6 @@ public class RobotOG extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
-    mPassAutoLineTask.initAutoModeFromSmartDashboard();
     mDrive.resetAll();
   }
 
@@ -68,9 +63,7 @@ public class RobotOG extends IterativeRobot {
    * This function is called periodically during autonomous
    */
   @Override
-  public void autonomousPeriodic() {
-    mPassAutoLineTask.executeLoop();
-  }
+  public void autonomousPeriodic() {}
 
   /**
  * This function is run once each time the robot enters teleop mode

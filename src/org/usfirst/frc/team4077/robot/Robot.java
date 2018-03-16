@@ -1,9 +1,12 @@
 package org.usfirst.frc.team4077.robot;
 
-import org.usfirst.frc.team4077.robot.autonomous.automodes.AutoMode.AutoStartPosition;
+import org.usfirst.frc.team4077.robot.autonomous.automodes.AutoDoSwitch;
+import org.usfirst.frc.team4077.robot.autonomous.automodes.AutoModeSelector;
 import org.usfirst.frc.team4077.robot.autonomous.automodes.TestNavigationAutoMode;
 import org.usfirst.frc.team4077.robot.common.ControlInterpreter;
 import org.usfirst.frc.team4077.robot.components.Drive;
+import org.usfirst.frc.team4077.robot.components.Lift;
+import org.usfirst.frc.team4077.robot.components.Manipulator;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoMode;
@@ -13,7 +16,10 @@ import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends IterativeRobot {
+
   private Drive mDrive = Drive.getInstance();
+  private Lift mLift = Lift.getInstance();
+  private Manipulator mHand = Manipulator.getInstance();
 
   private ControlInterpreter mControlInterpreter =
       ControlInterpreter.getInstance();
@@ -21,7 +27,7 @@ public class Robot extends IterativeRobot {
   // private EncoderBasePassAutoLine mPassAutoLineTask = new
   // EncoderBasePassAutoLine(mDrive);
 
-  private TestNavigationAutoMode mTestAuto;
+  private AutoDoSwitch mTestAuto;
 
   private double mSpeedFactor = 0.75;
   private boolean mSlowSpeed;
@@ -38,7 +44,7 @@ public class Robot extends IterativeRobot {
 
     mDrive.resetAll();
 
-    mTestAuto = new TestNavigationAutoMode(mDrive);
+    mTestAuto = new AutoDoSwitch(mDrive, mLift, mHand);
 
     UsbCamera mLifecam3000 = CameraServer.getInstance().startAutomaticCapture();
     mLifecam3000.setVideoMode(VideoMode.PixelFormat.kMJPEG, 320, 240, 15);
@@ -52,7 +58,8 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousInit() {
-    mTestAuto.init(Alliance.Blue, "LRL", AutoStartPosition.START_LEFT);
+    mTestAuto.init(Alliance.Red, "LRL",
+                   AutoModeSelector.AutoStartPosition.START_LEFT, 1000);
   }
 
   /**
@@ -60,6 +67,8 @@ public class Robot extends IterativeRobot {
    */
   @Override
   public void autonomousPeriodic() {
+    System.out.println("Encoder Values: " + mDrive.getMotorDistance("L") +
+                       ", " + mDrive.getMotorDistance("R"));
     mTestAuto.executeLoop();
   }
 

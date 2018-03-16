@@ -2,6 +2,7 @@ package org.usfirst.frc.team4077.robot.components;
 
 import org.usfirst.frc.team4077.robot.autonomous.PIDControllerAdvanced;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -11,8 +12,8 @@ public class Lift {
   // NOTE Private Objects
   private static Lift mInstance = new Lift();
 
-  public WPI_TalonSRX mLeftLift = new WPI_TalonSRX(2);
-  public WPI_TalonSRX mRightLift = new WPI_TalonSRX(6);
+  public TalonSRX mLeftLift = new TalonSRX(2);
+  public TalonSRX mRightLift = new TalonSRX(6);
 
   private DigitalInput mLeftTopLimit = new DigitalInput(1);
   private DigitalInput mRightTopLimit = new DigitalInput(0);
@@ -72,8 +73,10 @@ public class Lift {
       SmartDashboard.putString("Right Lift Power: ",
                                Double.toString(rightPower));
 
-      mLeftLift.set(leftPower * LEFT_MOTOR_SPEED_SCALE);
-      mRightLift.set(rightPower * RIGHT_MOTOR_SPEED_SCALE);
+      mLeftLift.set(ControlMode.PercentOutput,
+                    leftPower * LEFT_MOTOR_SPEED_SCALE);
+      mRightLift.set(ControlMode.PercentOutput,
+                     rightPower * RIGHT_MOTOR_SPEED_SCALE);
     }
   }
 
@@ -81,10 +84,10 @@ public class Lift {
     if (mIsEnabled) {
       switch (motorAbbreviation) {
       case "L":
-        mLeftLift.set(power);
+        mLeftLift.set(ControlMode.PercentOutput, power);
         break;
       case "R":
-        mRightLift.set(power);
+        mRightLift.set(ControlMode.PercentOutput, power);
         break;
       default:
         break;

@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4077.robot.components;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 public class Climber {
@@ -8,7 +9,7 @@ public class Climber {
   // NOTE Private Objects
   private static Climber mInstance = new Climber();
 
-  private WPI_TalonSRX mClimber = new WPI_TalonSRX(5);
+  private TalonSRX mClimber = new TalonSRX(5);
 
   // NOTE Public Constants
 
@@ -26,7 +27,7 @@ public class Climber {
   public void climb(double power) {
     if (mIsEnabled) {
       double powerVal = applyDeadband(power, DEADBAND);
-      mClimber.set(powerVal);
+      mClimber.set(ControlMode.PercentOutput, powerVal);
     }
   }
 

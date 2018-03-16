@@ -1,5 +1,8 @@
 package org.usfirst.frc.team4077.robot.components;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -8,28 +11,36 @@ public class Drive {
   // NOTE Private Objects
   private static Drive mInstance = new Drive();
 
-  private WPI_TalonSRX mFrontLeft = new WPI_TalonSRX(4);
-  private WPI_TalonSRX mRearLeft = new WPI_TalonSRX(3);
-  private WPI_TalonSRX mFrontRight = new WPI_TalonSRX(8);
-  private WPI_TalonSRX mRearRight = new WPI_TalonSRX(7);
+  private TalonSRX mFrontLeft = new TalonSRX(4);
+  private TalonSRX mRearLeft = new TalonSRX(3);
+  private TalonSRX mFrontRight = new TalonSRX(8);
+  private TalonSRX mRearRight = new TalonSRX(7);
 
   // NOTE Public Constants COMMENT OUT VALUES FOR COMP ROBOT
-  public static final double WHEEL_DIAMETER = 4.0;                      // 6.0;
-  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 1440 * (3); // 1000;
-  public static final int ENCODER_TICKS_PER_ROTATION_RIGHT =
-      1440 * (3); // 1000;
+  public static final double WHEEL_DIAMETER = 4.0;                  // 6.0;
+  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 10800;  // 1000;
+  public static final int ENCODER_TICKS_PER_ROTATION_RIGHT = 10800; // 1000;
   public static final double DEADBAND = 0.02;
 
   // NOTE Private Variables
   private boolean mIsEnabled = false;
-  private double mLeftEncoderOffset;
-  private double mRightEncoderOffset;
 
   // NOTE Constructor
   private Drive() {
     mFrontLeft.setInverted(true);
+
+    mRearLeft.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1,
+                                   10);
+    mRearLeft.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+    mRearLeft.setSensorPhase(true);
     mRearLeft.setInverted(true);
+
     mFrontRight.setInverted(false);
+
+    mRearRight.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 1,
+                                    10);
+    mRearRight.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+    mRearRight.setSensorPhase(false);
     mRearRight.setInverted(false);
   }
 
@@ -50,10 +61,10 @@ public class Drive {
       wheelSpeeds[3] = x + y - rotation;  // Rear right
 
       normalize(wheelSpeeds);
-      mFrontLeft.set(wheelSpeeds[0]);
-      mFrontRight.set(wheelSpeeds[1]);
-      mRearLeft.set(wheelSpeeds[2]);
-      mRearRight.set(wheelSpeeds[3]);
+      mFrontLeft.set(ControlMode.PercentOutput, wheelSpeeds[0]);
+      mFrontRight.set(ControlMode.PercentOutput, wheelSpeeds[1]);
+      mRearLeft.set(ControlMode.PercentOutput, wheelSpeeds[2]);
+      mRearRight.set(ControlMode.PercentOutput, wheelSpeeds[3]);
     }
   }
 
@@ -61,16 +72,16 @@ public class Drive {
     if (mIsEnabled) {
       switch (motorAbbreviation) {
       case "FL":
-        mFrontLeft.set(power);
+        mFrontLeft.set(ControlMode.PercentOutput, power);
         break;
       case "RL":
-        mRearLeft.set(power);
+        mRearLeft.set(ControlMode.PercentOutput, power);
         break;
       case "FR":
-        mFrontRight.set(power);
+        mFrontRight.set(ControlMode.PercentOutput, power);
         break;
       case "RR":
-        mRearRight.set(power);
+        mRearRight.set(ControlMode.PercentOutput, power);
         break;
       default:
         break;
@@ -84,9 +95,10 @@ public class Drive {
   }
 
   public void resetEncoders() {
-    mLeftEncoderOffset = getMotorDistance("L", false);
-    mRightEncoderOffset = getMotorDistance("R", false);
-    System.out.println(mLeftEncoderOffset);
+    mRearLeft.setSelectedSensorPosition(0, 0, 10);
+    mRearLeft.getSensorCollection().setQuadraturePosition(0, 10);
+    mRearRight.setSelectedSensorPosition(0, 0, 10);
+    mRearRight.getSensorCollection().setQuadraturePosition(0, 10);
   }
 
   public void resetSensors() {
@@ -95,26 +107,26 @@ public class Drive {
 
   public void printTelemetry() {
     SmartDashboard.putString("Left Distance: ",
-                             Double.toString(getMotorDistance("L", true)));
+                             Double.toString(getMotorDistance("L")));
     SmartDashboard.putString("Right Distance: ",
-                             Double.toString(getMotorDistance("R", true)));
+                             Double.toString(getMotorDistance("R")));
   }
 
   // NOTE Getters
   public boolean getEnableStatus() { return mIsEnabled; }
 
-  public double getMotorDistance(String motorAbbreviation, boolean useOffsets) {
+  public double getMotorDistance(String motorAbbreviation) {
     switch (motorAbbreviation) {
     case "L":
       return rotationsToInches(
-                 mRearLeft.getSensorCollection().getQuadraturePosition() /
-                 (double)ENCODER_TICKS_PER_ROTATION_LEFT) -
-          (useOffsets ? mLeftEncoderOffset : 0);
+          mRearLeft.getSelectedSensorPosition(
+              0) / // getSensorCollection().getQuadraturePosition() /
+          (double)ENCODER_TICKS_PER_ROTATION_LEFT);
     case "R":
       return -rotationsToInches(
-                 mRearRight.getSensorCollection().getQuadraturePosition() /
-                 (double)ENCODER_TICKS_PER_ROTATION_RIGHT) -
-          (useOffsets ? mRightEncoderOffset : 0);
+          mRearRight.getSelectedSensorPosition(
+              0) / // getSensorCollection().getQuadraturePosition() /
+          (double)ENCODER_TICKS_PER_ROTATION_RIGHT);
     default:
       return 0;
     }

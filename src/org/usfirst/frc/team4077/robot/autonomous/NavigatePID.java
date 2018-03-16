@@ -39,20 +39,25 @@ public class NavigatePID {
     mTurnTimeOutSeconds = seconds;
   }
 
+  public int getCurrentType() {
+    return (int)mMovementArray[mMovementArrayStep][0];
+  }
+
+  public int getCurrentStep() { return mMovementArrayStep; }
+
   public void initialize(double[][] movementArray) {
     mMovementArray = movementArray;
-    mDistanceReferenceLeft = mDrive.getMotorDistance("L", true);
-    mDistanceReferenceRight = mDrive.getMotorDistance("R", true);
     mMovementArrayStep = 0;
     mNavX.zeroYaw();
     mDrive.resetAll();
+    mDistanceReferenceLeft = mDrive.getMotorDistance("L");
+    mDistanceReferenceRight = mDrive.getMotorDistance("R");
   }
 
   public void loopNavigation() {
     mYawAngle = mNavX.getYaw();
     mDrive.printTelemetry();
     SmartDashboard.putNumber("Yaw", mYawAngle);
-    System.out.println((int)mMovementArray[mMovementArrayStep][0]);
     move((int)mMovementArray[mMovementArrayStep][0],
          mMovementArray[mMovementArrayStep][1],
          mMovementArray[mMovementArrayStep][2]);
@@ -89,19 +94,15 @@ public class NavigatePID {
 
   private void moveOnYAxis(double goal, double Tp) {
     if (Tp < 0) {
-      if (((mDrive.getMotorDistance("L", true) >
-            (goal + mDistanceReferenceLeft)) |
-           (mDrive.getMotorDistance("R", true) >
-            (goal + mDistanceReferenceRight)))) {
+      if (((mDrive.getMotorDistance("L") > (goal + mDistanceReferenceLeft)) &&
+           (mDrive.getMotorDistance("R") > (goal + mDistanceReferenceRight)))) {
         loopPID(Tp, 0.0);
       } else {
         nextMovement();
       }
     } else {
-      if (((mDrive.getMotorDistance("L", true) <
-            (goal + mDistanceReferenceLeft)) |
-           (mDrive.getMotorDistance("R", true) <
-            (goal + mDistanceReferenceRight)))) {
+      if (((mDrive.getMotorDistance("L") < (goal + mDistanceReferenceLeft)) &&
+           (mDrive.getMotorDistance("R") < (goal + mDistanceReferenceRight)))) {
 
         loopPID(Tp, 0.0);
 
@@ -113,15 +114,13 @@ public class NavigatePID {
 
   private void moveOnXAxis(double goal, double Tp) {
     if (Tp < 0) {
-      if ((mDrive.getMotorDistance("L", true) >
-           (goal + mDistanceReferenceLeft))) {
+      if ((mDrive.getMotorDistance("L") > (goal + mDistanceReferenceLeft))) {
         loopPID(0.0, Tp);
       } else {
         nextMovement();
       }
     } else {
-      if ((mDrive.getMotorDistance("R", true) >
-           (goal + mDistanceReferenceLeft))) {
+      if ((mDrive.getMotorDistance("R") > (goal + mDistanceReferenceLeft))) {
         loopPID(0.0, Tp);
       } else {
         nextMovement();
@@ -153,12 +152,12 @@ public class NavigatePID {
 
   private void fullStop() { mDrive.driveCartesian(0.0, 0.0, 0.0); }
 
-  private void nextMovement() {
+  public void nextMovement() {
     fullStop();
     mCurrentStepStartTime = System.currentTimeMillis();
     mCompletedHeading = mYawAngle;
-    mDistanceReferenceLeft = mDrive.getMotorDistance("L", true);
-    mDistanceReferenceRight = mDrive.getMotorDistance("R", true);
+    mDistanceReferenceLeft = mDrive.getMotorDistance("L");
+    mDistanceReferenceRight = mDrive.getMotorDistance("R");
     mMovementArrayStep++;
   }
 

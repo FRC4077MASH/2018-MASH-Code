@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4077.robot.components;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 public class Manipulator {
@@ -8,8 +9,8 @@ public class Manipulator {
   // NOTE Private Objects
   private static Manipulator mInstance = new Manipulator();
 
-  private WPI_TalonSRX mLeftIntake = new WPI_TalonSRX(9);
-  private WPI_TalonSRX mRightIntake = new WPI_TalonSRX(10);
+  private TalonSRX mLeftIntake = new TalonSRX(9);
+  private TalonSRX mRightIntake = new TalonSRX(10);
 
   // NOTE Public Constants
 
@@ -30,8 +31,8 @@ public class Manipulator {
   public void intake(double power) {
     if (mIsEnabled) {
       double powerVal = applyDeadband(power, DEADBAND);
-      mLeftIntake.set(powerVal);
-      mRightIntake.set(powerVal);
+      mLeftIntake.set(ControlMode.PercentOutput, powerVal);
+      mRightIntake.set(ControlMode.PercentOutput, powerVal);
     }
   }
 
@@ -39,10 +40,10 @@ public class Manipulator {
     if (mIsEnabled) {
       switch (motorAbbreviation) {
       case "L":
-        mLeftIntake.set(power);
+        mLeftIntake.set(ControlMode.PercentOutput, power);
         break;
       case "R":
-        mRightIntake.set(power);
+        mRightIntake.set(ControlMode.PercentOutput, power);
         break;
       default:
         break;
