@@ -1,5 +1,6 @@
 package org.usfirst.frc.team4077.robot.autonomous.automodes;
 
+import org.usfirst.frc.team4077.robot.common.NavXSensor;
 import org.usfirst.frc.team4077.robot.components.Drive;
 import org.usfirst.frc.team4077.robot.components.Lift;
 import org.usfirst.frc.team4077.robot.components.Manipulator;
@@ -14,6 +15,7 @@ public class AutoModeSelector {
   private Drive mDrive;
   private Lift mLift;
   private Manipulator mManipulator;
+  private NavXSensor mNavX;
   private long mDelayMillis;
   private boolean mRunAuto;
   private boolean mDoSwitch;
@@ -24,16 +26,20 @@ public class AutoModeSelector {
 
   /* Auto Mode Objects Here */
   private AutoDoSwitch mAutoDoSwitch;
+  private AutoDoScale mAutoDoScale;
   /* Auto Mode Objects Here */
 
-  public AutoModeSelector(Drive drive, Lift lift, Manipulator manipulator) {
+  public AutoModeSelector(Drive drive, Lift lift, Manipulator manipulator,
+                          NavXSensor navX) {
     mDrive = drive;
     mLift = lift;
     mManipulator = manipulator;
+    mNavX = navX;
     mPrefs = Preferences.getInstance();
 
     /* Auto Mode Objects Here */
-    mAutoDoSwitch = new AutoDoSwitch(mDrive, mLift, mManipulator);
+    mAutoDoSwitch = new AutoDoSwitch(mDrive, mLift, mManipulator, mNavX);
+    mAutoDoScale = new AutoDoScale(mDrive, mLift, mManipulator, mNavX);
     /* Auto Mode Objects Here */
 
     mPrefs.putInt("AutoStartPos", 0);
@@ -76,6 +82,8 @@ public class AutoModeSelector {
     } else if (!mDoSwitch && mDoScale) {
       // Do Scale
       System.out.println("Running auto: Scale");
+      mAutoDoScale.init(DriverStation.getInstance().getAlliance(), gameData,
+                        mAutoStartPosition, mDelayMillis);
     } else {
       // Neither
       System.out.println("Running auto: None");
@@ -91,11 +99,10 @@ public class AutoModeSelector {
         System.out.println("Running auto: Both");
       } else if (mDoSwitch && !mDoScale) {
         // Do Switch
-        System.out.println("Running auto: Switch");
         mAutoDoSwitch.executeLoop();
       } else if (!mDoSwitch && mDoScale) {
         // Do Scale
-        System.out.println("Running auto: Scale");
+        mAutoDoScale.executeLoop();
       } else {
         // Neither
         System.out.println("Running auto: None");

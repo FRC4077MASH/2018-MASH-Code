@@ -2,6 +2,7 @@ package org.usfirst.frc.team4077.robot;
 
 import org.usfirst.frc.team4077.robot.autonomous.automodes.AutoModeSelector;
 import org.usfirst.frc.team4077.robot.common.ControlInterpreter;
+import org.usfirst.frc.team4077.robot.common.NavXSensor;
 import org.usfirst.frc.team4077.robot.components.Climber;
 import org.usfirst.frc.team4077.robot.components.Drive;
 import org.usfirst.frc.team4077.robot.components.Lift;
@@ -10,13 +11,16 @@ import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoMode;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.IterativeRobot;
+import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
   private Drive mDrive = Drive.getInstance();
   private Lift mLift = Lift.getInstance();
   private Climber mClimber = Climber.getInstance();
   private Manipulator mManipulator = Manipulator.getInstance();
+  private NavXSensor mNavX = new NavXSensor(SPI.Port.kMXP);
 
   private ControlInterpreter mControlInterpreter =
       ControlInterpreter.getInstance();
@@ -39,7 +43,7 @@ public class Robot extends IterativeRobot {
     mClimber.enableComponent(true);
     mManipulator.enableComponent(true);
 
-    mTestAuto = new AutoModeSelector(mDrive, mLift, mManipulator);
+    mTestAuto = new AutoModeSelector(mDrive, mLift, mManipulator, mNavX);
 
     mDrive.resetAll();
     mLift.resetAll();
@@ -54,6 +58,8 @@ public class Robot extends IterativeRobot {
   public void robotPeriodic() {
     mDrive.printTelemetry();
     mLift.printTelemetry();
+    SmartDashboard.putString("Yaw: ",
+                             Double.toString(mNavX.getAngleUnlimited()));
   }
 
   /**

@@ -10,7 +10,7 @@ import org.usfirst.frc.team4077.robot.common.NavXSensor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class AutoDoSwitch {
+public class AutoDoScale {
   private NavigatePID mNavigatorPID;
   private Lift mLift;
   private Manipulator mManipulator;
@@ -22,11 +22,8 @@ public class AutoDoSwitch {
   private long mStepStartTime;
 
   // For state machine, start non-navigation step values at 5 just to be safe
-  private double mStepsFromLeftToLeft[][] = new double[][] {
-      {0, 1.0, 156.0}, {2, 1.0, -90},  {0, 0.5, 18},   {5, 0, 0},
-      {0, -1.0, -3.0}, {2, 1.0, 0},    {0, 1.0, 51.0}, {2, 1.0, -135},
-      {6, 0, 0},       {0, 1.0, 30.0}, {2, 1.0, -150}, {0, -1.0, -3},
-      {7, 0, 0},       {0, -1.0, -18}, {-1, 0.0, 0.0}};
+  private double mStepsFromLeftToLeft[][] =
+      new double[][] {{0, 1.0, 288.0}, {2, 1.0, -60}, {-1, 0.0, 0.0}};
   private double mStepsFromLeftToRight[][] = new double[][] {
       {0, 1.0, 214.0}, {2, 1.0, -90}, {0, 1.0, 168},  {2, 1.0, -180},
       {0, 1.0, 12},    {5, 0, 0},     {0, -0.5, -18}, {-1, 1.0, 0.0}};
@@ -36,19 +33,17 @@ public class AutoDoSwitch {
       {0, 1.0, 6.0},  {5, 0, 0},      {0, -0.5, -18}, {-1, 0.0, 0.0}};
   private double mStepsFromCenterToRight[][] = new double[][] {
       {0, 1.0, 24.0}, {2, 1.0, -45.0}, {0, 1.0, 80.0}, {2, 1.0, 0.0},
-      {0, 1.0, 6.0},  {5, 0, 0},       {0, -0.5, -66}, {-1, 0.0, 0.0}};
+      {0, 1.0, 6.0},  {5, 0, 0},       {0, -0.5, -18}, {-1, 0.0, 0.0}};
 
   private double mStepsFromRightToLeft[][] = new double[][] {
       {0, 1.0, 214.0}, {2, 1.0, 90}, {0, 1.0, 168},  {2, 1.0, 180},
       {0, 1.0, 12},    {5, 0, 0},    {0, -0.5, -18}, {-1, 1.0, 0.0}};
-  private double mStepsFromRightToRight[][] = new double[][] {
-      {0, 1.0, 156.0}, {2, 1.0, 90},   {0, 0.5, 18},   {5, 0, 0},
-      {0, -1.0, -3.0}, {2, 1.0, 0},    {0, 1.0, 51.0}, {2, 1.0, 135},
-      {6, 0, 0},       {0, 1.0, 30.0}, {2, 1.0, 150},  {0, -1.0, -3},
-      {7, 0, 0},       {0, -1.0, -18}, {-1, 0.0, 0.0}};
+  private double mStepsFromRightToRight[][] =
+      new double[][] {{0, 1.0, 156.0}, {2, 1.0, 90},   {0, 0.5, 18},
+                      {5, 0, 0},       {0, -0.5, -18}, {-1, 0.0, 0.0}};
 
-  public AutoDoSwitch(Drive drive, Lift lift, Manipulator manipulator,
-                      NavXSensor navX) {
+  public AutoDoScale(Drive drive, Lift lift, Manipulator manipulator,
+                     NavXSensor navX) {
     mLift = lift;
     mManipulator = manipulator;
 
@@ -62,7 +57,7 @@ public class AutoDoSwitch {
                    AutoStartPosition autoStartPosition, long delayMillis) {
     mDelayMillis = delayMillis;
     // Choose which navigation to run
-    if (gameSpecificData.charAt(0) == 'L') {
+    if (gameSpecificData.charAt(1) == 'L') {
       switch (autoStartPosition) {
       case START_LEFT:
         mNavigatorPID.initialize(mStepsFromLeftToLeft);
@@ -115,7 +110,7 @@ public class AutoDoSwitch {
     case 2: // Raise, deposit, lower
       switch (mSubStateCount) {
       case 0: // Lift
-        if (AutoModeSelector.getAutoTime() >= 1000 + mStepStartTime) {
+        if (AutoModeSelector.getAutoTime() >= 2000 + mStepStartTime) {
           mLift.liftWithLimitSwitchLimits(0.0, true);
           mStepStartTime = AutoModeSelector.getAutoTime();
           mSubStateCount++;
@@ -125,7 +120,7 @@ public class AutoDoSwitch {
         }
         break;
       case 1: // Deposit
-        if (AutoModeSelector.getAutoTime() >= 500 + mStepStartTime) {
+        if (AutoModeSelector.getAutoTime() >= 1000 + mStepStartTime) {
           mManipulator.intake(0.0);
           mStepStartTime = AutoModeSelector.getAutoTime();
           mSubStateCount++;
@@ -152,66 +147,7 @@ public class AutoDoSwitch {
         break;
       }
       break;
-    case 3: // Navigate
-      if (mNavigatorPID.getCurrentType() == 6) {
-        mManipulator.intake(1.0);
-        System.out.println("INTAKING");
-        mStepStartTime = AutoModeSelector.getAutoTime();
-        mStepCount++;
-        mNavigatorPID.nextMovement();
-      } else {
-        mNavigatorPID.loopNavigation();
-      }
-      break;
-    case 4: // Navigate
-      if (mNavigatorPID.getCurrentType() == 7) {
-        mStepStartTime = AutoModeSelector.getAutoTime();
-        mStepCount++;
-      } else {
-        mNavigatorPID.loopNavigation();
-      }
-      break;
-    case 5: // Raise, deposit, lower
-      switch (mSubStateCount) {
-      case 0: // Lift
-        if (AutoModeSelector.getAutoTime() >= 1000 + mStepStartTime) {
-          mLift.liftWithLimitSwitchLimits(0.0, true);
-          mStepStartTime = AutoModeSelector.getAutoTime();
-          mSubStateCount++;
-        } else {
-          mLift.liftWithLimitSwitchLimits(0.5, true);
-          System.out.println("LIFTING");
-        }
-        break;
-      case 1: // Deposit
-        if (AutoModeSelector.getAutoTime() >= 500 + mStepStartTime) {
-          mManipulator.intake(0.0);
-          mStepStartTime = AutoModeSelector.getAutoTime();
-          mSubStateCount++;
-        } else {
-          mManipulator.intake(-1.0);
-          System.out.println("SHOOTING");
-        }
-        break;
-      case 2: // Lower
-        if (AutoModeSelector.getAutoTime() >= 500 + mStepStartTime) {
-          mLift.liftWithLimitSwitchLimits(0.0, true);
-          mStepStartTime = AutoModeSelector.getAutoTime();
-          mSubStateCount++;
-        } else {
-          mLift.liftWithLimitSwitchLimits(-0.5, true);
-          System.out.println("LOWERING");
-        }
-        break;
-      default:
-        mSubStateCount = 0;
-        mStepStartTime = AutoModeSelector.getAutoTime();
-        mNavigatorPID.nextMovement();
-        mStepCount++;
-        break;
-      }
-      break;
-    case 6:
+    case 3:
       mNavigatorPID.loopNavigation();
       break;
     }

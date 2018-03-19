@@ -2,7 +2,6 @@ package org.usfirst.frc.team4077.robot.autonomous;
 
 import org.usfirst.frc.team4077.robot.components.Drive;
 
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import org.usfirst.frc.team4077.robot.common.NavXSensor;
@@ -21,12 +20,12 @@ public class NavigatePID {
   private double mYawAngle;
   private double mCompletedHeading;
 
-  public NavigatePID(Drive drive, long sampleTime) {
+  public NavigatePID(Drive drive, NavXSensor navX, long sampleTime) {
     mPID =
         new PIDControllerAdvanced(PIDControllerAdvanced.REVERSE, sampleTime,
                                   -1.0, 1.0, PIDControllerAdvanced.AUTOMATIC);
     mDrive = drive;
-    mNavX = new NavXSensor(SPI.Port.kMXP);
+    mNavX = navX;
   }
 
   public void setTunings(double kP, double kI, double kD) {
@@ -58,7 +57,7 @@ public class NavigatePID {
   public void loopNavigation() {
     mYawAngle = mNavX.getAngleUnlimited();
     mDrive.printTelemetry();
-    SmartDashboard.putNumber("Yaw", mYawAngle);
+    SmartDashboard.putNumber("Yaw: ", mYawAngle);
     move((int)mMovementArray[mMovementArrayStep][0],
          mMovementArray[mMovementArrayStep][1],
          mMovementArray[mMovementArrayStep][2]);
