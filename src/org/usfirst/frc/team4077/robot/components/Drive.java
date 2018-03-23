@@ -17,8 +17,8 @@ public class Drive {
   private TalonSRX mRearRight = new TalonSRX(7);
 
   // NOTE Public Constants  Old Values: Comp, program
-  public static final double WHEEL_DIAMETER = 6.0; // 6.0, 4.0
-  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 1000; // 10800
+  public static final double WHEEL_DIAMETER = 6.0;                 // 6.0, 4.0
+  public static final int ENCODER_TICKS_PER_ROTATION_LEFT = 1000;  // 10800
   public static final int ENCODER_TICKS_PER_ROTATION_RIGHT = 1000; // 10800
   public static final double DEADBAND = 0.02;
 

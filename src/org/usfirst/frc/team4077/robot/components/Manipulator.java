@@ -3,6 +3,8 @@ package org.usfirst.frc.team4077.robot.components;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.*;
 
+import edu.wpi.first.wpilibj.Servo;
+
 public class Manipulator {
   private static final double DEADBAND = 0.1;
 
@@ -11,6 +13,8 @@ public class Manipulator {
 
   private TalonSRX mLeftIntake = new TalonSRX(9);
   private TalonSRX mRightIntake = new TalonSRX(10);
+
+  // private Servo mFingerServo = new Servo(0);
 
   // NOTE Public Constants
 
@@ -31,6 +35,13 @@ public class Manipulator {
   public void intake(double power) {
     if (mIsEnabled) {
       double powerVal = applyDeadband(power, DEADBAND);
+
+      /*if (powerVal < 0.0) {
+        mFingerServo.setAngle(135);
+      } else {
+        mFingerServo.setAngle(45);
+      }*/
+
       mLeftIntake.set(ControlMode.PercentOutput, powerVal);
       mRightIntake.set(ControlMode.PercentOutput, powerVal);
     }
