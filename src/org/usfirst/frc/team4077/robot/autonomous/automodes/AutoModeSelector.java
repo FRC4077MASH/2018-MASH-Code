@@ -7,6 +7,7 @@ import org.usfirst.frc.team4077.robot.components.Manipulator;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoModeSelector {
   public enum AutoStartPosition { START_LEFT, START_CENTER, START_RIGHT }
@@ -27,6 +28,7 @@ public class AutoModeSelector {
   /* Auto Mode Objects Here */
   private AutoDoSwitch mAutoDoSwitch;
   private AutoDoScale mAutoDoScale;
+  private AutoDoSwitchThenScale mAutoDoSwitchThenScale;
   /* Auto Mode Objects Here */
 
   public AutoModeSelector(Drive drive, Lift lift, Manipulator manipulator,
@@ -40,6 +42,8 @@ public class AutoModeSelector {
     /* Auto Mode Objects Here */
     mAutoDoSwitch = new AutoDoSwitch(mDrive, mLift, mManipulator, mNavX);
     mAutoDoScale = new AutoDoScale(mDrive, mLift, mManipulator, mNavX);
+    mAutoDoSwitchThenScale =
+        new AutoDoSwitchThenScale(mDrive, mLift, mManipulator, navX);
     /* Auto Mode Objects Here */
 
     mPrefs.putInt("AutoStartPos", 0);
@@ -74,6 +78,8 @@ public class AutoModeSelector {
     if (mDoSwitch && mDoScale) {
       // Do both
       System.out.println("Running auto: Both");
+      mAutoDoSwitchThenScale.init(DriverStation.getInstance().getAlliance(),
+                                  gameData, mAutoStartPosition, mDelayMillis);
     } else if (mDoSwitch && !mDoScale) {
       // Do Switch
       System.out.println("Running auto: Switch");
@@ -96,12 +102,21 @@ public class AutoModeSelector {
     if (mRunAuto) {
       if (mDoSwitch && mDoScale) {
         // Do both
-        System.out.println("Running auto: Both");
+        if (!mAutoDoSwitchThenScale.getIsDone()) {
+          SmartDashboard.putString("AutoTime: ", Long.toString(getAutoTime()));
+        }
+        mAutoDoSwitchThenScale.executeLoop();
       } else if (mDoSwitch && !mDoScale) {
         // Do Switch
+        if (!mAutoDoSwitch.getIsDone()) {
+          SmartDashboard.putString("AutoTime: ", Long.toString(getAutoTime()));
+        }
         mAutoDoSwitch.executeLoop();
       } else if (!mDoSwitch && mDoScale) {
         // Do Scale
+        if (!mAutoDoScale.getIsDone()) {
+          SmartDashboard.putString("AutoTime: ", Long.toString(getAutoTime()));
+        }
         mAutoDoScale.executeLoop();
       } else {
         // Neither

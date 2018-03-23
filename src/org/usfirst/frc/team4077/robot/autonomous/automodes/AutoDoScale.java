@@ -41,8 +41,9 @@ public class AutoDoScale {
 
     mNavX = navX;
     mNavigatorPID = new NavigatePID(drive, mNavX, 5);
-    mNavigatorPID.setTunings(0.0225, 0.00025,
-                             0.005); // For comp robot: (0.02, 0, 0.005);
+    mNavigatorPID.setTunings(0.02, 0.0001, 0.005); //(0.035, 0.00007, 0.004);
+    // For comp robot: (0.02,
+    // 0.0001, 0.005);
   }
 
   public void init(DriverStation.Alliance alliance, String gameSpecificData,
@@ -140,6 +141,14 @@ public class AutoDoScale {
     case 3:
       mNavigatorPID.loopNavigation();
       break;
+    }
+  }
+
+  public boolean getIsDone() {
+    if (mNavigatorPID.getCurrentType() == -1) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

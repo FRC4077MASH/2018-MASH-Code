@@ -114,9 +114,9 @@ public class Lift {
 
   // NOTE Getters
   public boolean getEnableStatus() { return mIsEnabled; }
-  
+
   public boolean isAtMax() {
-	  return (mLeftTopLimit.get() && mRightTopLimit.get());
+    return (mLeftTopLimit.get() && mRightTopLimit.get());
   }
 
   // NOTE Private conversion Methods

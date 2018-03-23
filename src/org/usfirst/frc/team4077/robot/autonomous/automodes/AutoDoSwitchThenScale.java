@@ -10,7 +10,7 @@ import org.usfirst.frc.team4077.robot.common.NavXSensor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class AutoDoSwitch {
+public class AutoDoSwitchThenScale {
   private NavigatePID mNavigatorPID;
   private Lift mLift;
   private Manipulator mManipulator;
@@ -24,49 +24,42 @@ public class AutoDoSwitch {
   private long mStepStartTime;
 
   // For state machine, start non-navigation step values at 5 just to be safe
-  private double mStepsFromLeftToLeft[][] = new double[][] {
-      {0, 0.5, 142.0}, {2, 0.5, -90},  {0, 0.5, 18},    {5, 0, 0},
+  private double mStepsFromLeftToLeftToLeft[][] = new double[][] {
+      {0, 0.5, 144.0}, {2, 0.5, -90},  {0, 0.5, 18},     {5, 0, 0},
+      {0, -0.5, -3.0}, {2, 0.5, -10},  {0, 0.5, 55.0},   {2, 0.5, -150},
+      {6, 0, 0},       {0, 0.5, 38.0}, {2, 0.5, -140.0}, {2, 0.5, -150.0},
+      {0, -0.5, -3.0}, {7, 0, 0},      {0, -0.5, -72},   {2, 0.5, -60},
+      {0, 0.5, 12},    {8, 0, 0},      {-1, 0.0, 0.0}};
+  private double mStepsFromLeftToLeftToRight[][] = new double[][] {
+      {0, 0.5, 144.0}, {2, 0.5, -90},  {0, 0.5, 18},    {5, 0, 0},
       {0, -0.5, -3.0}, {2, 0.5, -10},  {0, 0.5, 55.0},  {2, 0.5, -150},
-      {6, 0, 0},       {0, 0.5, 38.0}, {0, -0.5, -3.0}, {7, 0, 0},
-      {8, 0, 0},       {0, -0.5, -18}, {-1, 0.0, 0.0}};
-  private double mStepsFromLeftToRight[][] = new double[][] {
+      {6, 0, 0},       {0, 0.5, 40.0}, {0, -0.5, -3.0}, {7, 0, 0},
+      {0, -0.5, -25},  {2, 0.5, -90},  {0, 0.5, 215},   {2, 0.5, 0},
+      {0, 0.5, 48},    {2, 0.5, 60},   {8, 0, 0},       {-1, 0.0, 0.0}};
+
+  private double mStepsFromLeftToRightToLeft[][] = new double[][] {
       {0, 0.5, 214.0}, {2, 0.5, -90},  {0, 0.5, 179},  {2, 0.5, -180},
       {0, 0.5, 12},    {5, 0, 0},      {0, -0.5, -3},  {6, 0, 0},
       {0, 0.5, 6},     {2, 0.5, -200}, {2, 0.5, -180}, {7, 0, 0},
+      {0, -0.5, 12},   {2, 0.5, 90},   {0, 0.5, 179},  {8, 0, 0},
+      {-1, 0.0, 0.0}};
+  private double mStepsFromLeftToRightToRight[][] = new double[][] {
+      {0, 0.5, 214.0}, {2, 0.5, -90},  {0, 0.5, 179},  {2, 0.5, -180},
+      {0, 0.5, 12},    {5, 0, 0},      {0, -0.5, -3},  {6, 0, 0},
+      {0, 0.5, 6},     {2, 0.5, -200}, {2, 0.5, -180}, {7, 0, 0},
+      {0, -0.5, -14},  {2, 0.5, -60},  {0, 0.5, 72},   {2, 0.5, 60},
       {8, 0, 0},       {-1, 0.0, 0.0}};
 
-  private double mStepsFromCenterToLeft[][] = new double[][] {
-      {0, 0.5, 24.0}, {2, 0.5, 45.0}, {0, 0.5, 80.0}, {2, 0.5, 0.0},
-      {0, 0.5, 3.0},  {5, 0, 0},      {0, -0.5, -30}, {2, 0.5, -60},
-      {6, 0, 0},      {0, 0.5, 65},   {7, 0, 0},      {0, -0.5, -60},
-      {2, 0.5, 0},    {0, 0.5, 42},   {8, 0, 0},      {-1, 0.0, 0.0}};
-  private double mStepsFromCenterToRight[][] = new double[][] {
-      {0, 0.5, 24.0}, {2, 0.5, -45.0}, {0, 0.5, 68.0}, {2, 0.5, 0.0},
-      {0, 0.5, 3.0},  {5, 0, 0},       {0, -0.5, -30}, {2, 0.5, 50},
-      {6, 0, 0},      {0, 0.5, 60},    {7, 0, 0},      {0, -0.5, -60},
-      {2, 0.5, 0},    {0, 0.5, 42},    {8, 0, 0},      {-1, 0.0, 0.0}};
-
-  private double mStepsFromRightToRight[][] = new double[][] {
-      {0, 0.5, 144.0}, {2, 0.5, 90},   {0, 0.5, 18},    {5, 0, 0},
-      {0, -0.5, -3.0}, {2, 0.5, 10},   {0, 0.5, 55.0},  {2, 0.5, 150},
-      {6, 0, 0},       {0, 0.5, 40.0}, {0, -0.5, -3.0}, {7, 0, 0},
-      {8, 0, 0},       {0, -0.5, -18}, {-1, 0.0, 0.0}};
-  private double mStepsFromRightToLeft[][] = new double[][] {
-      {0, 0.5, 214.0}, {2, 0.5, 90},  {0, 0.5, 179}, {2, 0.5, 180},
-      {0, 0.5, 12},    {5, 0, 0},     {0, -0.5, -3}, {6, 0, 0},
-      {0, 0.5, 6},     {2, 0.5, 200}, {2, 0.5, 180}, {7, 0, 0},
-      {8, 0, 0},       {-1, 0.0, 0.0}};
-
-  public AutoDoSwitch(Drive drive, Lift lift, Manipulator manipulator,
-                      NavXSensor navX) {
+  public AutoDoSwitchThenScale(Drive drive, Lift lift, Manipulator manipulator,
+                               NavXSensor navX) {
     mLift = lift;
     mManipulator = manipulator;
 
     mNavX = navX;
     mNavigatorPID = new NavigatePID(drive, mNavX, 5);
-    mNavigatorPID.setTunings(0.02, 0.0001, 0.005); //(0.035, 0.00007, 0.004);
-                                                   //For comp robot: (0.02,
-                                                   //0.0001, 0.005);
+    mNavigatorPID.setTunings(0.02, 0.0001, 0.005); //(0.0375, 0.00007,0.004);
+    // For comp robot: (0.02,
+    // 0.0001, 0.005);
   }
 
   public void init(DriverStation.Alliance alliance, String gameSpecificData,
@@ -75,26 +68,44 @@ public class AutoDoSwitch {
     mAutoPosition = autoStartPosition;
     // Choose which navigation to run
     if (gameSpecificData.charAt(0) == 'L') {
-      switch (autoStartPosition) {
-      case START_LEFT:
-        mNavigatorPID.initialize(mStepsFromLeftToLeft);
-        break;
-      case START_CENTER:
-        mNavigatorPID.initialize(mStepsFromCenterToLeft);
-        break;
-      case START_RIGHT:
-        mNavigatorPID.initialize(mStepsFromRightToLeft);
+      if (gameSpecificData.charAt(1) == 'L') {
+        switch (autoStartPosition) {
+        case START_LEFT:
+          mNavigatorPID.initialize(mStepsFromLeftToLeftToLeft);
+          break;
+        case START_CENTER:
+          break;
+        case START_RIGHT:
+        }
+      } else {
+        switch (autoStartPosition) {
+        case START_LEFT:
+          mNavigatorPID.initialize(mStepsFromLeftToLeftToRight);
+          break;
+        case START_CENTER:
+          break;
+        case START_RIGHT:
+        }
       }
     } else {
-      switch (autoStartPosition) {
-      case START_LEFT:
-        mNavigatorPID.initialize(mStepsFromLeftToRight);
-        break;
-      case START_CENTER:
-        mNavigatorPID.initialize(mStepsFromCenterToRight);
-        break;
-      case START_RIGHT:
-        mNavigatorPID.initialize(mStepsFromRightToRight);
+      if (gameSpecificData.charAt(1) == 'L') {
+        switch (autoStartPosition) {
+        case START_LEFT:
+          mNavigatorPID.initialize(mStepsFromLeftToRightToLeft);
+          break;
+        case START_CENTER:
+          break;
+        case START_RIGHT:
+        }
+      } else {
+        switch (autoStartPosition) {
+        case START_LEFT:
+          mNavigatorPID.initialize(mStepsFromLeftToRightToRight);
+          break;
+        case START_CENTER:
+          break;
+        case START_RIGHT:
+        }
       }
     }
     // TODO Add switch to select paths
@@ -199,7 +210,7 @@ public class AutoDoSwitch {
     case 6: // Raise, deposit, lower
       switch (mSubStateCount) {
       case 0: // Lift
-        if (AutoModeSelector.getAutoTime() >= 1500 + mStepStartTime) {
+        if (mLift.isAtMax()) {
           mLift.liftWithLimitSwitchLimits(0.0, true);
           mStepStartTime = AutoModeSelector.getAutoTime();
           mSubStateCount++;
